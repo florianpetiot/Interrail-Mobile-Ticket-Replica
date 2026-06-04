@@ -2,6 +2,10 @@
   import { onMount } from 'svelte';
   import AztecCode from './components/AztecCode.svelte';
   import Watermark from './components/Watermark.svelte';
+  import { translations, getSystemLanguage } from './lib/i18n.js';
+
+  const currentLang = getSystemLanguage();
+  const t = translations[currentLang];
 
   // Default values for restoration
   const DEFAULTS = {
@@ -22,7 +26,6 @@
     journeyDest: 'Heraklion',
     journeyDestTime: '06:50',
     journeyCode: 'SSF18075',
-    journeyLabel: 'Nur mit dem Griechische Inseln Pass',
     journeySeatText: 'Seat reservations required',
     
     // Bottom details
@@ -32,7 +35,6 @@
     lastValidityDay: '06-06-2026',
     
     // UI elements
-    navbarTitle: 'Fahrkarte',
     conditionsText: 'View the Conditions of Use of the Pass'
   };
 
@@ -53,7 +55,6 @@
   let journeyDest = $state(DEFAULTS.journeyDest);
   let journeyDestTime = $state(DEFAULTS.journeyDestTime);
   let journeyCode = $state(DEFAULTS.journeyCode);
-  let journeyLabel = $state(DEFAULTS.journeyLabel);
   let journeySeatText = $state(DEFAULTS.journeySeatText);
 
   let issuer = $state(DEFAULTS.issuer);
@@ -61,7 +62,6 @@
   let issuedOn = $state(DEFAULTS.issuedOn);
   let lastValidityDay = $state(DEFAULTS.lastValidityDay);
 
-  let navbarTitle = $state(DEFAULTS.navbarTitle);
   let conditionsText = $state(DEFAULTS.conditionsText);
 
   // Time and clock logic
@@ -72,7 +72,7 @@
   let isLocked = $state(false);
 
   // Active Navigation Tab
-  let activeTab = $state('Mein Pass');
+  let activeTab = $state('meinPass');
 
   // Multi-tap detection times
   let lastClickTimeMehr = 0;
@@ -93,7 +93,7 @@
 
   // Multi-tap handlers for navigation buttons
   function handleMehrClick() {
-    activeTab = 'Mehr';
+    activeTab = 'mehr';
     const now = Date.now();
     if (now - lastClickTimeMehr < 300) {
       toggleFullScreen();
@@ -102,7 +102,7 @@
   }
 
   function handleMeinPassClick() {
-    activeTab = 'Mein Pass';
+    activeTab = 'meinPass';
     const now = Date.now();
     if (now - lastClickTimeMeinPass < 300) {
       isLocked = !isLocked;
@@ -141,7 +141,6 @@
     journeyDest = DEFAULTS.journeyDest;
     journeyDestTime = DEFAULTS.journeyDestTime;
     journeyCode = DEFAULTS.journeyCode;
-    journeyLabel = DEFAULTS.journeyLabel;
     journeySeatText = DEFAULTS.journeySeatText;
     
     issuer = DEFAULTS.issuer;
@@ -149,7 +148,6 @@
     issuedOn = DEFAULTS.issuedOn;
     lastValidityDay = DEFAULTS.lastValidityDay;
     
-    navbarTitle = DEFAULTS.navbarTitle;
     conditionsText = DEFAULTS.conditionsText;
 
     // Reset clock and unlock fields
@@ -178,13 +176,11 @@
         if (data.journeyDest !== undefined) journeyDest = data.journeyDest;
         if (data.journeyDestTime !== undefined) journeyDestTime = data.journeyDestTime;
         if (data.journeyCode !== undefined) journeyCode = data.journeyCode;
-        if (data.journeyLabel !== undefined) journeyLabel = data.journeyLabel;
         if (data.journeySeatText !== undefined) journeySeatText = data.journeySeatText;
         if (data.issuer !== undefined) issuer = data.issuer;
         if (data.civ !== undefined) civ = data.civ;
         if (data.issuedOn !== undefined) issuedOn = data.issuedOn;
         if (data.lastValidityDay !== undefined) lastValidityDay = data.lastValidityDay;
-        if (data.navbarTitle !== undefined) navbarTitle = data.navbarTitle;
         if (data.conditionsText !== undefined) conditionsText = data.conditionsText;
         if (data.isClockLive !== undefined) isClockLive = data.isClockLive;
         if (data.isLocked !== undefined) isLocked = data.isLocked;
@@ -217,8 +213,8 @@
       name, dob, residence, idNumberSuffix, passNumber, passType,
       classType, validOn, activatedOn, lastOnline, journeyOrigin,
       journeyOriginTime, journeyDest, journeyDestTime, journeyCode,
-      journeyLabel, journeySeatText, issuer, civ, issuedOn,
-      lastValidityDay, navbarTitle, conditionsText, isClockLive, isLocked
+      journeySeatText, issuer, civ, issuedOn,
+      lastValidityDay, conditionsText, isClockLive, isLocked
     };
     localStorage.setItem('interrail_pass_data', JSON.stringify(data));
   });
@@ -236,7 +232,7 @@
     </p>
     <div class="text-xs text-gray-400 mt-2 space-y-2">
       <p>👉 Cliquez sur n'importe quel texte pour le modifier.</p>
-      <p>🔒 <strong>Bloquer l'édition</strong> : Double-cliquez sur l'onglet <strong>"Mein Pass"</strong> pour geler/dégeler tous les champs de saisie.</p>
+      <p>❄️ <strong>Bloquer l'édition</strong> : Double-cliquez sur l'onglet <strong>"Mein Pass"</strong> pour geler/dégeler tous les champs de saisie.</p>
       <p>🖥️ <strong>Mode plein écran</strong> : Double-cliquez sur l'onglet <strong>"Mehr"</strong> pour basculer en plein écran.</p>
       <p>💾 Vos modifications sont <strong>sauvegardées automatiquement</strong> dans le navigateur.</p>
     </div>
@@ -297,13 +293,9 @@
       
       <!-- Centered Navbar title -->
       <div class="flex-grow text-center mr-5">
-        <input 
-          type="text" 
-          readonly={isLocked}
-          bind:value={navbarTitle} 
-          class="editable-input text-center font-semibold text-[17px] text-white tracking-wide {isLocked ? 'pointer-events-none select-none' : ''}" 
-          style="width: {navbarTitle.length + 1}ch;"
-        />
+        <span class="font-semibold text-[17px] text-white tracking-wide select-none">
+          {t.fahrkarte}
+        </span>
       </div>
     </header>
 
@@ -524,14 +516,9 @@
                     <div class="w-3.5 h-3.5 rounded-full bg-ticket-orange flex items-center justify-center text-white text-[9.5px] font-black select-none">
                       !
                     </div>
-                    <span 
-                      role="textbox"
-                      tabindex={isLocked ? -1 : 0}
-                      contenteditable="true"
-                      bind:textContent={journeyLabel} 
-                      onkeydown={preventEnter}
-                      class="editable-input font-medium text-ticket-orange-dark cursor-text hover:bg-gray-200/50 focus:bg-blue-50/50 px-0.5 rounded outline-none {isLocked ? 'pointer-events-none select-none' : ''}" 
-                    ></span>
+                    <span class="font-medium text-ticket-orange-dark select-none">
+                      {t.journeyLabel}
+                    </span>
                   </div>
 
                   <!-- Italics Seat warning -->
@@ -628,68 +615,100 @@
     </main>
 
     <!-- 3. Bottom Fixed App Tabbar (4 tabs with click/double-tap logic) -->
-    <footer class="bg-white border-t border-gray-150 h-16 w-full fixed bottom-0 left-0 right-0 z-40 flex items-center justify-around px-2 text-[10px] text-ticket-gray">
+    <footer class="bg-white border-t border-gray-150 h-16 w-full absolute bottom-0 left-0 right-0 z-40 flex items-center justify-around px-2 text-[10px]">
       
       <!-- Tab 1: Planer -->
       <button 
-        onclick={() => activeTab = 'Planer'}
-        class="flex flex-col items-center gap-1 flex-1 py-1 transition {activeTab === 'Planer' ? 'text-ticket-blue font-bold' : 'text-gray-400'}"
+        onclick={() => activeTab = 'planer'}
+        class="flex flex-col items-center justify-center h-[52px] px-3.5 rounded-[14px] transition duration-150 {activeTab === 'planer' ? 'bg-[#e2e5eb] text-[#0e113b] font-bold' : 'text-[#787c94] hover:text-[#0e113b]'}"
       >
-        <svg class="w-5.5 h-5.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-          <circle cx="12" cy="12" r="10" />
-          <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6l4 2" />
-        </svg>
-        <span>Planer</span>
+        {#if activeTab === 'planer'}
+          <svg class="w-6 h-6" viewBox="0 0 28 28" fill="currentColor">
+            <circle cx="14" cy="14" r="10" />
+            <path d="M14 6.5 a 1.5 1.5 0 0 1 1.5 1.5 v5.25 h4.25 a 1.5 1.5 0 0 1 0 3 h -5.75 a 1.5 1.5 0 0 1 -1.5 -1.5 v -6.75 a 1.5 1.5 0 0 1 1.5 -1.5 z" fill="#ffffff" />
+          </svg>
+        {:else}
+          <svg class="w-6 h-6" viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="14" cy="14" r="10" />
+            <path d="M14 8v6h5" />
+          </svg>
+        {/if}
+        <span class="mt-0.5 leading-none">{t.planer}</span>
       </button>
 
       <!-- Tab 2: Meine Reise -->
       <button 
-        onclick={() => activeTab = 'Meine Reise'}
-        class="flex flex-col items-center gap-1 flex-1 py-1 transition {activeTab === 'Meine Reise' ? 'text-ticket-blue font-bold' : 'text-gray-400'}"
+        onclick={() => activeTab = 'meineReise'}
+        class="flex flex-col items-center justify-center h-[52px] px-3.5 rounded-[14px] transition duration-150 {activeTab === 'meineReise' ? 'bg-[#e2e5eb] text-[#0e113b] font-bold' : 'text-[#787c94] hover:text-[#0e113b]'}"
       >
-        <svg class="w-5.5 h-5.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-          <rect x="3" y="6" width="18" height="13" rx="2" />
-          <path stroke-linecap="round" stroke-linejoin="round" d="M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2" />
-        </svg>
-        <span>Meine Reise</span>
+        {#if activeTab === 'meineReise'}
+          <svg class="w-6 h-6" viewBox="0 0 28 28" fill="currentColor">
+            <path d="M10 7V5c0-1.1.9-2 2-2h4c1.1 0 2 .9 2 2v2h-8z" />
+            <rect x="6" y="7" width="16" height="16" rx="3" />
+            <rect x="10.2" y="11" width="1.6" height="8" rx="0.5" fill="#ffffff" />
+            <rect x="16.2" y="11" width="1.6" height="8" rx="0.5" fill="#ffffff" />
+            <rect x="8" y="23" width="2" height="2" rx="0.5" />
+            <rect x="18" y="23" width="2" height="2" rx="0.5" />
+          </svg>
+        {:else}
+          <svg class="w-6 h-6" viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M10 7V5c0-1.1.9-2 2-2h4c1.1 0 2 .9 2 2v2" />
+            <rect x="6" y="7" width="16" height="16" rx="3" />
+            <line x1="11" y1="11" x2="11" y2="19" />
+            <line x1="17" y1="11" x2="17" y2="19" />
+            <line x1="9" y1="23" x2="9" y2="25" />
+            <line x1="19" y1="23" x2="19" y2="25" />
+          </svg>
+        {/if}
+        <span class="mt-0.5 leading-none">{t.meineReise}</span>
       </button>
 
-      <!-- Tab 3: Mein Pass (ACTIVE state has capsule highlight; Double-click locks/unlocks fields) -->
+      <!-- Tab 3: Mein Pass -->
       <button 
         onclick={handleMeinPassClick}
-        class="flex flex-col items-center gap-1 flex-1 py-1 text-ticket-blue relative"
+        class="flex flex-col items-center justify-center h-[52px] px-3.5 rounded-[14px] transition duration-150 {activeTab === 'meinPass' ? 'bg-[#e2e5eb] text-[#0e113b] font-bold' : 'text-[#787c94] hover:text-[#0e113b]'}"
       >
-        <div class="px-5 py-1.5 rounded-full flex items-center justify-center transition {activeTab === 'Mein Pass' ? 'bg-[#e8ecf4]' : 'bg-transparent'}" style="color: #073893;">
-          <svg class="w-5.5 h-5.5" fill="currentColor" viewBox="0 0 24 24">
-            <rect x="4" y="3" width="16" height="18" rx="2" />
-            <rect x="7" y="6" width="4" height="4.5" rx="0.5" fill="#ffffff" />
-            <rect x="13" y="6.5" width="4" height="0.8" fill="#ffffff" />
-            <rect x="13" y="8" width="4" height="0.8" fill="#ffffff" />
-            <!-- Lock icon inside active symbol if locked -->
-            {#if isLocked}
-              <circle cx="12" cy="14.5" r="2.5" fill="#ef4444" />
-            {:else}
-              <circle cx="12" cy="14.5" r="2.5" fill="#f59e0b" />
-            {/if}
+        {#if activeTab === 'meinPass'}
+          <svg class="w-6 h-6" viewBox="0 0 28 28" fill="currentColor">
+            <rect x="6" y="4" width="16" height="20" rx="3" />
+            <circle cx="14" cy="14" r="5" fill="none" stroke="#ffffff" stroke-width="1.2" />
+            <line x1="14" y1="9" x2="14" y2="19" stroke="#ffffff" stroke-width="1.2" />
+            <line x1="9" y1="14" x2="19" y2="14" stroke="#ffffff" stroke-width="1.2" />
+            <path d="M14 9c1.5 1.5 2.5 3 2.5 5s-1 3.5-2.5 5" fill="none" stroke="#ffffff" stroke-width="1.2" />
+            <path d="M14 9c-1.5 1.5-2.5 3-2.5 5s1 3.5 2.5 5" fill="none" stroke="#ffffff" stroke-width="1.2" />
           </svg>
-        </div>
-        <span class="font-bold flex items-center gap-0.5">
-          Mein Pass 
-          {#if isLocked}
-            <span class="text-[9px] text-red-500 font-extrabold select-none">🔒</span>
-          {/if}
-        </span>
+        {:else}
+          <svg class="w-6 h-6" viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="6" y="4" width="16" height="20" rx="3" />
+            <circle cx="14" cy="14" r="4.5" stroke-width="1.8" />
+            <line x1="14" y1="9.5" x2="14" y2="18.5" stroke-width="1.5" />
+            <line x1="9.5" y1="14" x2="18.5" y2="14" stroke-width="1.5" />
+            <path d="M14 9.5c1.2 1.2 2 2.5 2 4.5s-0.8 3.3-2 4.5" stroke-width="1.5" />
+            <path d="M14 9.5c-1.2 1.2-2 2.5-2 4.5s0.8 3.3 2 4.5" stroke-width="1.5" />
+          </svg>
+        {/if}
+        <span class="mt-0.5 leading-none">{t.meinPass}</span>
       </button>
 
-      <!-- Tab 4: Mehr (Double-click triggers full screen mode) -->
+      <!-- Tab 4: Mehr -->
       <button 
         onclick={handleMehrClick}
-        class="flex flex-col items-center gap-1 flex-1 py-1 transition {activeTab === 'Mehr' ? 'text-ticket-blue font-bold' : 'text-gray-400'}"
+        class="flex flex-col items-center justify-center h-[52px] px-3.5 rounded-[14px] transition duration-150 {activeTab === 'mehr' ? 'bg-[#e2e5eb] text-[#0e113b] font-bold' : 'text-[#787c94] hover:text-[#0e113b]'}"
       >
-        <svg class="w-5.5 h-5.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
-        </svg>
-        <span>Mehr</span>
+        {#if activeTab === 'mehr'}
+          <svg class="w-6 h-6" viewBox="0 0 28 28" fill="currentColor">
+            <rect x="4" y="6.5" width="20" height="3" rx="1.5" />
+            <rect x="4" y="12.5" width="20" height="3" rx="1.5" />
+            <rect x="4" y="18.5" width="20" height="3" rx="1.5" />
+          </svg>
+        {:else}
+          <svg class="w-6 h-6" viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="5" y1="8" x2="23" y2="8" />
+            <line x1="5" y1="14" x2="23" y2="14" />
+            <line x1="5" y1="20" x2="23" y2="20" />
+          </svg>
+        {/if}
+        <span class="mt-0.5 leading-none">{t.mehr}</span>
       </button>
 
     </footer>
