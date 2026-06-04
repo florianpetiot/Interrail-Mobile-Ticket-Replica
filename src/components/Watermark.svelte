@@ -55,9 +55,18 @@
 <div class="absolute inset-0 pointer-events-none select-none overflow-hidden z-0 rounded-b-2xl">
   <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
     <defs>
-      <!-- Tight repeating text tile -->
-      <pattern id="wm-text" width="700" height="28" patternUnits="userSpaceOnUse" patternTransform="rotate(-16)">
+      <!-- Tight repeating text tile with offset rows -->
+      <pattern id="wm-text" width="700" height="112" patternUnits="userSpaceOnUse" patternTransform="rotate(-16)">
         <text x="0" y="18" font-family="system-ui, -apple-system, sans-serif" font-size="12.5" font-weight="700" fill="#3b4963" opacity="0.20" letter-spacing="0.8">
+          {watermarkText()} / {shortText()} / {watermarkText()}
+        </text>
+        <text x="-175" y="46" font-family="system-ui, -apple-system, sans-serif" font-size="12.5" font-weight="700" fill="#3b4963" opacity="0.20" letter-spacing="0.8">
+          {watermarkText()} / {shortText()} / {watermarkText()}
+        </text>
+        <text x="-350" y="74" font-family="system-ui, -apple-system, sans-serif" font-size="12.5" font-weight="700" fill="#3b4963" opacity="0.20" letter-spacing="0.8">
+          {watermarkText()} / {shortText()} / {watermarkText()}
+        </text>
+        <text x="-525" y="102" font-family="system-ui, -apple-system, sans-serif" font-size="12.5" font-weight="700" fill="#3b4963" opacity="0.20" letter-spacing="0.8">
           {watermarkText()} / {shortText()} / {watermarkText()}
         </text>
       </pattern>
