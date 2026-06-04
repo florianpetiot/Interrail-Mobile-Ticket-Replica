@@ -556,10 +556,10 @@
 
         </div>
 
-        <!-- D. Footer Card Section (Dense Watermark + Issuer/CIV Grid + Conditions text) -->
-        <div class="relative mt-2 px-5 pt-5 pb-4 border-t border-gray-100 bg-[#fafbfe] rounded-b-2xl min-h-[150px] flex flex-col justify-between">
+        <!-- D. Footer Card Section (Dense Watermark + Issuer/CIV Grid) -->
+        <div class="relative mt-2 px-5 pt-8 pb-10 border-t border-gray-100 bg-[#f5f6fa] rounded-b-2xl min-h-[180px] flex flex-col justify-center">
           
-          <!-- Responsive watermarked background overlay (Includes first 6 stars for ID number) -->
+          <!-- Responsive watermarked background overlay -->
           <Watermark 
             name={name}
             dob={dob}
@@ -570,7 +570,7 @@
           />
 
           <!-- Issuer info text on top of watermark -->
-          <div class="relative z-10 grid grid-cols-2 gap-y-3.5 gap-x-2 text-[12px] text-left">
+          <div class="relative z-10 grid grid-cols-2 gap-y-5 gap-x-2 text-[12px] text-left">
             <div>
               <div class="text-[9px] text-ticket-gray uppercase tracking-wider font-semibold">Issuer</div>
               <input 
@@ -610,19 +610,19 @@
             </div>
           </div>
 
-          <!-- Bottom Conditions link text -->
-          <div class="relative z-10 text-center mt-6">
-            <input 
-              type="text" 
-              readonly={isLocked}
-              bind:value={conditionsText} 
-              class="editable-input text-ticket-blue text-[11px] underline text-center cursor-pointer font-semibold {isLocked ? 'pointer-events-none select-none' : ''}" 
-              style="width: 100%;" 
-            />
-          </div>
-
         </div>
 
+      </div>
+
+      <!-- E. Conditions link OUTSIDE the card, below it, on clean background -->
+      <div class="text-center mt-5 mb-2">
+        <input 
+          type="text" 
+          readonly={isLocked}
+          bind:value={conditionsText} 
+          class="editable-input text-ticket-navy text-[13px] underline text-center cursor-pointer font-semibold decoration-ticket-navy {isLocked ? 'pointer-events-none select-none' : ''}" 
+          style="width: 100%;" 
+        />
       </div>
 
     </main>
