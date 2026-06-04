@@ -51,6 +51,16 @@ body {
   box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.15);
 }
 
+/* When card is locked, disable pointer events and editing visual feedback for inputs/spans */
+.locked-mode .editable-input {
+  pointer-events: none !important;
+  user-select: none !important;
+  border-color: transparent !important;
+  background-color: transparent !important;
+  box-shadow: none !important;
+  cursor: default !important;
+}
+
 /* Watermark security styling */
 .security-bg {
   position: relative;

@@ -68,8 +68,47 @@
   let systemTime = $state('22:38:07');
   let isClockLive = $state(true);
 
+  // Lock editable fields state
+  let isLocked = $state(false);
+
   // Active Navigation Tab
   let activeTab = $state('Mein Pass');
+
+  // Multi-tap detection times
+  let lastClickTimeMehr = 0;
+  let lastClickTimeMeinPass = 0;
+
+  // Toggle fullscreen mode
+  function toggleFullScreen() {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen().catch(err => {
+        console.error(`Error attempting to enable full-screen mode: ${err.message}`);
+      });
+    } else {
+      if (document.exitFullscreen) {
+        document.exitFullscreen();
+      }
+    }
+  }
+
+  // Multi-tap handlers for navigation buttons
+  function handleMehrClick() {
+    activeTab = 'Mehr';
+    const now = Date.now();
+    if (now - lastClickTimeMehr < 300) {
+      toggleFullScreen();
+    }
+    lastClickTimeMehr = now;
+  }
+
+  function handleMeinPassClick() {
+    activeTab = 'Mein Pass';
+    const now = Date.now();
+    if (now - lastClickTimeMeinPass < 300) {
+      isLocked = !isLocked;
+    }
+    lastClickTimeMeinPass = now;
+  }
 
   // Prevent line breaks in contenteditable fields
   function preventEnter(e) {
@@ -113,8 +152,9 @@
     navbarTitle = DEFAULTS.navbarTitle;
     conditionsText = DEFAULTS.conditionsText;
 
-    // Reset clock to live
+    // Reset clock and unlock fields
     isClockLive = true;
+    isLocked = false;
   }
 
   // Load from localStorage on mount
@@ -147,6 +187,7 @@
         if (data.navbarTitle !== undefined) navbarTitle = data.navbarTitle;
         if (data.conditionsText !== undefined) conditionsText = data.conditionsText;
         if (data.isClockLive !== undefined) isClockLive = data.isClockLive;
+        if (data.isLocked !== undefined) isLocked = data.isLocked;
       } catch (e) {
         console.error('Error loading saved data', e);
       }
@@ -177,7 +218,7 @@
       classType, validOn, activatedOn, lastOnline, journeyOrigin,
       journeyOriginTime, journeyDest, journeyDestTime, journeyCode,
       journeyLabel, journeySeatText, issuer, civ, issuedOn,
-      lastValidityDay, navbarTitle, conditionsText, isClockLive
+      lastValidityDay, navbarTitle, conditionsText, isClockLive, isLocked
     };
     localStorage.setItem('interrail_pass_data', JSON.stringify(data));
   });
@@ -193,15 +234,26 @@
     <p class="text-xs leading-relaxed text-gray-400">
       Ceci est une maquette interactive de votre billet Interrail. Tous les textes visibles sur le téléphone sont des <strong>champs modifiables en ligne</strong>. 
     </p>
-    <div class="text-xs text-gray-400 mt-2 space-y-1">
+    <div class="text-xs text-gray-400 mt-2 space-y-2">
       <p>👉 Cliquez sur n'importe quel texte pour le modifier.</p>
-      <p>👉 Le QR code Aztec et le filigrane se mettent à jour automatiquement !</p>
+      <p>🔒 <strong>Bloquer l'édition</strong> : Double-cliquez sur l'onglet <strong>"Mein Pass"</strong> pour geler/dégeler tous les champs de saisie.</p>
+      <p>🖥️ <strong>Mode plein écran</strong> : Double-cliquez sur l'onglet <strong>"Mehr"</strong> pour basculer en plein écran.</p>
       <p>💾 Vos modifications sont <strong>sauvegardées automatiquement</strong> dans le navigateur.</p>
     </div>
     
     <hr class="border-purple-950 my-2" />
 
     <div class="flex flex-col gap-2">
+      <!-- Lock Fields Toggle -->
+      <label class="flex items-center justify-between text-xs cursor-pointer bg-[#241c33] hover:bg-[#2c223e] p-3 rounded-lg transition">
+        <span>Geler l'édition (Lecture seule)</span>
+        <input 
+          type="checkbox" 
+          bind:checked={isLocked} 
+          class="accent-blue-500 w-4 h-4 cursor-pointer" 
+        />
+      </label>
+
       <!-- Live Clock Toggle -->
       <label class="flex items-center justify-between text-xs cursor-pointer bg-[#241c33] hover:bg-[#2c223e] p-3 rounded-lg transition">
         <span>Horloge en temps réel</span>
@@ -227,7 +279,7 @@
   </div>
 
   <!-- CENTER: Simulated Phone Container (Borderless & full-screen on mobile, mockup on desktop) -->
-  <div class="relative w-full h-screen sm:w-[385px] sm:h-[820px] bg-ticket-bg sm:rounded-[48px] sm:shadow-[0_24px_50px_-12px_rgba(0,0,0,0.5)] sm:border-[10px] sm:border-[#1f172f] overflow-hidden flex flex-col">
+  <div class="relative w-full h-screen sm:w-[385px] sm:h-[820px] bg-ticket-bg sm:rounded-[48px] sm:shadow-[0_24px_50px_-12px_rgba(0,0,0,0.5)] sm:border-[10px] sm:border-[#1f172f] overflow-hidden flex flex-col class:locked-mode={isLocked}">
     
     <!-- Phone Top Camera/Ear Speaker notch overlay (Simulated for visual wow factor on desktop) -->
     <div class="absolute top-0 inset-x-0 h-5 bg-[#130926] z-50 flex justify-center items-center pointer-events-none rounded-t-[38px] hidden sm:flex">
@@ -247,8 +299,9 @@
       <div class="flex-grow text-center mr-5">
         <input 
           type="text" 
+          readonly={isLocked}
           bind:value={navbarTitle} 
-          class="editable-input text-center font-semibold text-[17px] text-white tracking-wide" 
+          class="editable-input text-center font-semibold text-[17px] text-white tracking-wide {isLocked ? 'pointer-events-none select-none' : ''}" 
           style="width: {navbarTitle.length + 1}ch;"
         />
       </div>
@@ -267,11 +320,12 @@
           <div class="w-full flex justify-end items-center pr-1 h-7">
             <input 
               type="text" 
+              readonly={isLocked}
               bind:value={systemTime} 
               onfocus={handleClockFocus}
-              class="editable-input text-right font-bold text-ticket-navy text-sm w-20 font-mono tracking-tight" 
+              class="editable-input text-right font-bold text-ticket-navy text-sm w-20 font-mono tracking-tight {isLocked ? 'pointer-events-none select-none' : ''}" 
             />
-            {#if !isClockLive}
+            {#if !isClockLive && !isLocked}
               <button 
                 onclick={() => isClockLive = true} 
                 title="Activer l'horloge en direct"
@@ -292,8 +346,9 @@
             <span>PASS NUMBER</span>
             <input 
               type="text" 
+              readonly={isLocked}
               bind:value={passNumber} 
-              class="editable-input font-bold text-ticket-navy uppercase tracking-wide text-center" 
+              class="editable-input font-bold text-ticket-navy uppercase tracking-wide text-center {isLocked ? 'pointer-events-none select-none' : ''}" 
               style="width: {passNumber.length + 0.5}ch;"
             />
           </div>
@@ -317,8 +372,9 @@
           <div class="w-full">
             <input 
               type="text" 
+              readonly={isLocked}
               bind:value={passType} 
-              class="editable-input font-bold text-ticket-navy text-[19px] leading-tight tracking-tight text-left" 
+              class="editable-input font-bold text-ticket-navy text-[19px] leading-tight tracking-tight text-left {isLocked ? 'pointer-events-none select-none' : ''}" 
             />
           </div>
 
@@ -326,8 +382,9 @@
           <div class="w-full mt-0.5">
             <input 
               type="text" 
+              readonly={isLocked}
               bind:value={classType} 
-              class="editable-input font-bold text-ticket-blue text-[15px] leading-none text-left" 
+              class="editable-input font-bold text-ticket-blue text-[15px] leading-none text-left {isLocked ? 'pointer-events-none select-none' : ''}" 
             />
           </div>
 
@@ -336,8 +393,9 @@
             <div class="text-[11px] text-ticket-gray font-normal tracking-wide">Valid on</div>
             <input 
               type="text" 
+              readonly={isLocked}
               bind:value={validOn} 
-              class="editable-input font-bold text-ticket-navy text-[21px] mt-0.5 leading-none" 
+              class="editable-input font-bold text-ticket-navy text-[21px] mt-0.5 leading-none {isLocked ? 'pointer-events-none select-none' : ''}" 
             />
           </div>
 
@@ -348,17 +406,17 @@
             
             <div class="text-ticket-gray font-normal">Name</div>
             <div>
-              <input type="text" bind:value={name} class="editable-input font-medium text-ticket-navy text-left" />
+              <input type="text" readonly={isLocked} bind:value={name} class="editable-input font-medium text-ticket-navy text-left {isLocked ? 'pointer-events-none select-none' : ''}" />
             </div>
 
             <div class="text-ticket-gray font-normal">Date of birth</div>
             <div>
-              <input type="text" bind:value={dob} class="editable-input font-medium text-ticket-navy text-left" />
+              <input type="text" readonly={isLocked} bind:value={dob} class="editable-input font-medium text-ticket-navy text-left {isLocked ? 'pointer-events-none select-none' : ''}" />
             </div>
 
             <div class="text-ticket-gray font-normal">Residence</div>
             <div>
-              <input type="text" bind:value={residence} class="editable-input font-medium text-ticket-navy text-left" />
+              <input type="text" readonly={isLocked} bind:value={residence} class="editable-input font-medium text-ticket-navy text-left {isLocked ? 'pointer-events-none select-none' : ''}" />
             </div>
 
             <!-- ID number with 6 stars hardcoded, only last 3 characters editable -->
@@ -367,20 +425,21 @@
               <span class="tracking-wide">******</span>
               <input 
                 type="text" 
+                readonly={isLocked}
                 bind:value={idNumberSuffix} 
                 maxlength="3"
-                class="editable-input font-medium text-ticket-navy text-left p-0 pl-0.5 w-[3.5ch] tracking-wide uppercase" 
+                class="editable-input font-medium text-ticket-navy text-left p-0 pl-0.5 w-[3.5ch] tracking-wide uppercase {isLocked ? 'pointer-events-none select-none' : ''}" 
               />
             </div>
 
             <div class="text-ticket-gray font-normal">Activated on</div>
             <div>
-              <input type="text" bind:value={activatedOn} class="editable-input font-medium text-ticket-navy text-left" />
+              <input type="text" readonly={isLocked} bind:value={activatedOn} class="editable-input font-medium text-ticket-navy text-left {isLocked ? 'pointer-events-none select-none' : ''}" />
             </div>
 
             <div class="text-ticket-gray font-normal">Last online</div>
             <div>
-              <input type="text" bind:value={lastOnline} class="editable-input font-medium text-ticket-navy text-left" />
+              <input type="text" readonly={isLocked} bind:value={lastOnline} class="editable-input font-medium text-ticket-navy text-left {isLocked ? 'pointer-events-none select-none' : ''}" />
             </div>
 
           </div>
@@ -393,7 +452,7 @@
             <!-- Section Header -->
             <div class="flex justify-between items-baseline mb-3">
               <span class="font-bold text-ticket-navy text-base tracking-tight">Journeys</span>
-              <button class="text-ticket-blue text-xs font-semibold hover:underline">
+              <button class="text-ticket-blue text-xs font-semibold hover:underline {isLocked ? 'pointer-events-none opacity-50' : ''}">
                 Edit journeys
               </button>
             </div>
@@ -411,49 +470,49 @@
                 <div class="inline-block">
                   <span 
                     role="textbox"
-                    tabindex="0"
-                    contenteditable="true" 
+                    tabindex={isLocked ? -1 : 0}
+                    contenteditable="true"
                     bind:textContent={journeyOrigin} 
                     onkeydown={preventEnter}
-                    class="editable-input font-medium cursor-text hover:bg-gray-100/50 focus:bg-blue-50/50 px-0.5 rounded outline-none border border-transparent hover:border-gray-200/50 focus:border-blue-300 inline" 
+                    class="editable-input font-medium cursor-text hover:bg-gray-100/50 focus:bg-blue-50/50 px-0.5 rounded outline-none border border-transparent hover:border-gray-200/50 focus:border-blue-300 inline {isLocked ? 'pointer-events-none select-none' : ''}" 
                   ></span>
                   
                   <span 
                     role="textbox"
-                    tabindex="0"
-                    contenteditable="true" 
+                    tabindex={isLocked ? -1 : 0}
+                    contenteditable="true"
                     bind:textContent={journeyOriginTime} 
                     onkeydown={preventEnter}
-                    class="editable-input font-bold cursor-text hover:bg-gray-100/50 focus:bg-blue-50/50 px-0.5 rounded outline-none border border-transparent hover:border-gray-200/50 focus:border-blue-300 inline ml-1 font-mono" 
+                    class="editable-input font-bold cursor-text hover:bg-gray-100/50 focus:bg-blue-50/50 px-0.5 rounded outline-none border border-transparent hover:border-gray-200/50 focus:border-blue-300 inline ml-1 font-mono {isLocked ? 'pointer-events-none select-none' : ''}" 
                   ></span>
                   
                   <span class="text-ticket-gray mx-1 font-normal inline select-none">–</span>
                   
                   <span 
                     role="textbox"
-                    tabindex="0"
-                    contenteditable="true" 
+                    tabindex={isLocked ? -1 : 0}
+                    contenteditable="true"
                     bind:textContent={journeyDest} 
                     onkeydown={preventEnter}
-                    class="editable-input font-medium cursor-text hover:bg-gray-100/50 focus:bg-blue-50/50 px-0.5 rounded outline-none border border-transparent hover:border-gray-200/50 focus:border-blue-300 inline" 
+                    class="editable-input font-medium cursor-text hover:bg-gray-100/50 focus:bg-blue-50/50 px-0.5 rounded outline-none border border-transparent hover:border-gray-200/50 focus:border-blue-300 inline {isLocked ? 'pointer-events-none select-none' : ''}" 
                   ></span>
                   
                   <span 
                     role="textbox"
-                    tabindex="0"
-                    contenteditable="true" 
+                    tabindex={isLocked ? -1 : 0}
+                    contenteditable="true"
                     bind:textContent={journeyDestTime} 
                     onkeydown={preventEnter}
-                    class="editable-input font-bold cursor-text hover:bg-gray-100/50 focus:bg-blue-50/50 px-0.5 rounded outline-none border border-transparent hover:border-gray-200/50 focus:border-blue-300 inline ml-1 font-mono" 
+                    class="editable-input font-bold cursor-text hover:bg-gray-100/50 focus:bg-blue-50/50 px-0.5 rounded outline-none border border-transparent hover:border-gray-200/50 focus:border-blue-300 inline ml-1 font-mono {isLocked ? 'pointer-events-none select-none' : ''}" 
                   ></span>
                   
                   <span 
                     role="textbox"
-                    tabindex="0"
-                    contenteditable="true" 
+                    tabindex={isLocked ? -1 : 0}
+                    contenteditable="true"
                     bind:textContent={journeyCode} 
                     onkeydown={preventEnter}
-                    class="editable-input text-ticket-gray cursor-text hover:bg-gray-100/50 focus:bg-blue-50/50 px-0.5 rounded outline-none border border-transparent hover:border-gray-200/50 focus:border-blue-300 inline ml-1 font-mono" 
+                    class="editable-input text-ticket-gray cursor-text hover:bg-gray-100/50 focus:bg-blue-50/50 px-0.5 rounded outline-none border border-transparent hover:border-gray-200/50 focus:border-blue-300 inline ml-1 font-mono {isLocked ? 'pointer-events-none select-none' : ''}" 
                   ></span>
                 </div>
 
@@ -467,11 +526,11 @@
                     </div>
                     <span 
                       role="textbox"
-                      tabindex="0"
-                      contenteditable="true" 
+                      tabindex={isLocked ? -1 : 0}
+                      contenteditable="true"
                       bind:textContent={journeyLabel} 
                       onkeydown={preventEnter}
-                      class="editable-input font-medium text-ticket-orange-dark cursor-text hover:bg-gray-200/50 focus:bg-blue-50/50 px-0.5 rounded outline-none" 
+                      class="editable-input font-medium text-ticket-orange-dark cursor-text hover:bg-gray-200/50 focus:bg-blue-50/50 px-0.5 rounded outline-none {isLocked ? 'pointer-events-none select-none' : ''}" 
                     ></span>
                   </div>
 
@@ -479,11 +538,11 @@
                   <div class="text-[11px] italic text-ticket-orange pl-1 mt-0.5">
                     <span 
                       role="textbox"
-                      tabindex="0"
-                      contenteditable="true" 
+                      tabindex={isLocked ? -1 : 0}
+                      contenteditable="true"
                       bind:textContent={journeySeatText} 
                       onkeydown={preventEnter}
-                      class="editable-input text-ticket-orange italic cursor-text hover:bg-gray-200/50 focus:bg-blue-50/50 px-0.5 rounded outline-none" 
+                      class="editable-input text-ticket-orange italic cursor-text hover:bg-gray-200/50 focus:bg-blue-50/50 px-0.5 rounded outline-none {isLocked ? 'pointer-events-none select-none' : ''}" 
                     ></span>
                   </div>
 
@@ -516,33 +575,37 @@
               <div class="text-[9px] text-ticket-gray uppercase tracking-wider font-semibold">Issuer</div>
               <input 
                 type="text" 
+                readonly={isLocked}
                 bind:value={issuer} 
-                class="editable-input font-bold text-ticket-navy mt-0.5 text-left" 
+                class="editable-input font-bold text-ticket-navy mt-0.5 text-left {isLocked ? 'pointer-events-none select-none' : ''}" 
               />
             </div>
             <div>
               <div class="text-[9px] text-ticket-gray uppercase tracking-wider font-semibold">CIV</div>
               <input 
                 type="text" 
+                readonly={isLocked}
                 bind:value={civ} 
                 placeholder="-" 
-                class="editable-input font-bold text-ticket-navy mt-0.5 text-left" 
+                class="editable-input font-bold text-ticket-navy mt-0.5 text-left {isLocked ? 'pointer-events-none select-none' : ''}" 
               />
             </div>
             <div>
               <div class="text-[9px] text-ticket-gray uppercase tracking-wider font-semibold">Issued on</div>
               <input 
                 type="text" 
+                readonly={isLocked}
                 bind:value={issuedOn} 
-                class="editable-input font-bold text-ticket-navy mt-0.5 text-left" 
+                class="editable-input font-bold text-ticket-navy mt-0.5 text-left {isLocked ? 'pointer-events-none select-none' : ''}" 
               />
             </div>
             <div>
               <div class="text-[9px] text-ticket-gray uppercase tracking-wider font-semibold">Last day of validity</div>
               <input 
                 type="text" 
+                readonly={isLocked}
                 bind:value={lastValidityDay} 
-                class="editable-input font-bold text-ticket-navy mt-0.5 text-left" 
+                class="editable-input font-bold text-ticket-navy mt-0.5 text-left {isLocked ? 'pointer-events-none select-none' : ''}" 
               />
             </div>
           </div>
@@ -551,8 +614,9 @@
           <div class="relative z-10 text-center mt-6">
             <input 
               type="text" 
+              readonly={isLocked}
               bind:value={conditionsText} 
-              class="editable-input text-ticket-blue text-[11px] underline text-center cursor-pointer font-semibold" 
+              class="editable-input text-ticket-blue text-[11px] underline text-center cursor-pointer font-semibold {isLocked ? 'pointer-events-none select-none' : ''}" 
               style="width: 100%;" 
             />
           </div>
@@ -563,7 +627,7 @@
 
     </main>
 
-    <!-- 3. Bottom Fixed App Tabbar (4 tabs) -->
+    <!-- 3. Bottom Fixed App Tabbar (4 tabs with click/double-tap logic) -->
     <footer class="bg-white border-t border-gray-150 h-16 w-full fixed bottom-0 left-0 right-0 z-40 flex items-center justify-around px-2 text-[10px] text-ticket-gray">
       
       <!-- Tab 1: Planer -->
@@ -590,10 +654,10 @@
         <span>Meine Reise</span>
       </button>
 
-      <!-- Tab 3: Mein Pass (ACTIVE state has capsule highlight) -->
+      <!-- Tab 3: Mein Pass (ACTIVE state has capsule highlight; Double-click locks/unlocks fields) -->
       <button 
-        onclick={() => activeTab = 'Mein Pass'}
-        class="flex flex-col items-center gap-1 flex-1 py-1 text-ticket-blue"
+        onclick={handleMeinPassClick}
+        class="flex flex-col items-center gap-1 flex-1 py-1 text-ticket-blue relative"
       >
         <div class="px-5 py-1.5 rounded-full flex items-center justify-center transition {activeTab === 'Mein Pass' ? 'bg-[#e8ecf4]' : 'bg-transparent'}" style="color: #073893;">
           <svg class="w-5.5 h-5.5" fill="currentColor" viewBox="0 0 24 24">
@@ -601,15 +665,25 @@
             <rect x="7" y="6" width="4" height="4.5" rx="0.5" fill="#ffffff" />
             <rect x="13" y="6.5" width="4" height="0.8" fill="#ffffff" />
             <rect x="13" y="8" width="4" height="0.8" fill="#ffffff" />
-            <circle cx="12" cy="14.5" r="2.5" fill="#f59e0b" />
+            <!-- Lock icon inside active symbol if locked -->
+            {#if isLocked}
+              <circle cx="12" cy="14.5" r="2.5" fill="#ef4444" />
+            {:else}
+              <circle cx="12" cy="14.5" r="2.5" fill="#f59e0b" />
+            {/if}
           </svg>
         </div>
-        <span class="font-bold">Mein Pass</span>
+        <span class="font-bold flex items-center gap-0.5">
+          Mein Pass 
+          {#if isLocked}
+            <span class="text-[9px] text-red-500 font-extrabold select-none">🔒</span>
+          {/if}
+        </span>
       </button>
 
-      <!-- Tab 4: Mehr -->
+      <!-- Tab 4: Mehr (Double-click triggers full screen mode) -->
       <button 
-        onclick={() => activeTab = 'Mehr'}
+        onclick={handleMehrClick}
         class="flex flex-col items-center gap-1 flex-1 py-1 transition {activeTab === 'Mehr' ? 'text-ticket-blue font-bold' : 'text-gray-400'}"
       >
         <svg class="w-5.5 h-5.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
