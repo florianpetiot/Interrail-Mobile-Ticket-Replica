@@ -81,12 +81,28 @@
   // Toggle fullscreen mode
   function toggleFullScreen() {
     if (!document.fullscreenElement) {
-      document.documentElement.requestFullscreen().catch(err => {
-        console.error(`Error attempting to enable full-screen mode: ${err.message}`);
-      });
+      document.documentElement.requestFullscreen()
+        .then(() => {
+          if (screen.orientation && screen.orientation.lock) {
+            screen.orientation.lock('portrait').catch(err => {
+              console.warn("Screen orientation lock is not supported on this device/browser:", err);
+            });
+          }
+        })
+        .catch(err => {
+          console.error(`Error attempting to enable full-screen mode: ${err.message}`);
+        });
     } else {
       if (document.exitFullscreen) {
-        document.exitFullscreen();
+        document.exitFullscreen()
+          .then(() => {
+            if (screen.orientation && screen.orientation.unlock) {
+              screen.orientation.unlock();
+            }
+          })
+          .catch(err => {
+            console.warn("Error exiting fullscreen or unlocking orientation:", err);
+          });
       }
     }
   }
@@ -713,6 +729,15 @@
 
     </footer>
 
+  </div>
+
+  <!-- Mobile landscape orientation lock overlay -->
+  <div class="hidden max-lg:landscape:flex fixed inset-0 bg-[#0d0916] z-[9999] flex-col items-center justify-center text-white p-6 text-center select-none">
+    <div class="text-4xl mb-4 animate-bounce">📱🔄</div>
+    <h3 class="font-bold text-lg mb-2">{t.rotateTitle}</h3>
+    <p class="text-xs text-gray-400 max-w-xs leading-relaxed">
+      {t.rotateDesc}
+    </p>
   </div>
 
 </div>

@@ -1,0 +1,17 @@
+{
+  "name": "Fahrkarte - Interrail Pass",
+  "short_name": "Fahrkarte",
+  "description": "Maquette interactive et éditable d'un billet Interrail",
+  "start_url": ".",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0d0916",
+  "theme_color": "#130926",
+  "icons": [
+    {
+      "src": "favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}

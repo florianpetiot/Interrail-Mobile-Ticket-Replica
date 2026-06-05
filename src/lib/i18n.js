@@ -5,7 +5,9 @@ export const translations = {
     meineReise: "Mon Voyage",
     meinPass: "Mon Pass",
     mehr: "Plus",
-    journeyLabel: "Uniquement avec le Pass Îles Grecques"
+    journeyLabel: "Uniquement avec le Pass Îles Grecques",
+    rotateTitle: "Veuillez tourner votre appareil",
+    rotateDesc: "Cette application est optimisée pour le mode portrait. Veuillez remettre votre téléphone en orientation portrait pour continuer."
   },
   en: {
     fahrkarte: "Ticket",
@@ -13,7 +15,9 @@ export const translations = {
     meineReise: "My Trip",
     meinPass: "My Pass",
     mehr: "More",
-    journeyLabel: "Only with the Greek Islands Pass"
+    journeyLabel: "Only with the Greek Islands Pass",
+    rotateTitle: "Please rotate your device",
+    rotateDesc: "This application is optimized for portrait mode. Please rotate your phone back to portrait orientation to continue."
   },
   de: {
     fahrkarte: "Fahrkarte",
@@ -21,7 +25,9 @@ export const translations = {
     meineReise: "Meine Reise",
     meinPass: "Mein Pass",
     mehr: "Mehr",
-    journeyLabel: "Nur mit dem Griechische Inseln Pass"
+    journeyLabel: "Nur mit dem Griechische Inseln Pass",
+    rotateTitle: "Bitte drehen Sie Ihr Gerät",
+    rotateDesc: "Diese Anwendung ist für das Hochformat optimiert. Bitte drehen Sie Ihr Telefon ins Hochformat zurück, um fortzufahren."
   },
   pl: {
     fahrkarte: "Bilet",
@@ -29,7 +35,9 @@ export const translations = {
     meineReise: "Moja podróż",
     meinPass: "Mój bilet",
     mehr: "Więcej",
-    journeyLabel: "Tylko z karnetem na wyspy greckie"
+    journeyLabel: "Tylko z karnetem na wyspy greckie",
+    rotateTitle: "Proszę obrócić urządzenie",
+    rotateDesc: "Ta aplikacja jest zoptymalizowana pod kątem trybu pionowego. Proszę obrócić telefon z powrotem do orientacji pionowej, aby kontynuować."
   },
   nl: {
     fahrkarte: "Ticket",
@@ -37,7 +45,9 @@ export const translations = {
     meineReise: "Mijn reis",
     meinPass: "Mijn pas",
     mehr: "Meer",
-    journeyLabel: "Alleen met de Griekse Eilanden Pass"
+    journeyLabel: "Alleen met de Griekse Eilanden Pass",
+    rotateTitle: "Draai uw apparaat alstublieft",
+    rotateDesc: "Deze applicatie is geoptimaliseerd voor portretmodus. Draai uw telefoon terug naar portretstand om door te gaan."
   }
 };
 
