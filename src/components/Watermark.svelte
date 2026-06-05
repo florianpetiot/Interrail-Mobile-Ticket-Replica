@@ -53,53 +53,33 @@
 
   // Generate smooth horizontal security waves tilted at -16 degrees to match text rotation
   function getHorizontalWaveA(i) {
-    const yBase = i * 18;
-    const amp = 8;
+    const yBase = i * 22 - 10; // Espacement de 22px pour bien répartir les 13 vagues sur les 180px de haut
+    const amp = 12; // Amplitude ajustée pour qu'elles se touchent/chevauchent légèrement
+    const freq = 0.075; // Fréquence augmentée = longueur d'onde plus courte
     const phaseOffset = i * 0.8;
     const slantFactor = 0.287; // tan(16 deg) matches the -16 degree rotation of text
     
-    const yVal = (x) => {
-      return yBase - (x - 130) * slantFactor + Math.sin(x * 0.05 + phaseOffset) * amp;
-    };
-
-    const x0 = 130, x1 = 185, x2 = 240, x3 = 295, x4 = 350;
-    const y0 = yVal(x0);
-    const y1 = yVal(x1);
-    const y2 = yVal(x2);
-    const y3 = yVal(x3);
-    const y4 = yVal(x4);
-
-    const cp = 18; // cubic tension factor for wave roundness
-    return `M ${x0} ${y0} ` +
-           `C ${x0 + cp} ${y0}, ${x1 - cp} ${y1}, ${x1} ${y1} ` +
-           `C ${x1 + cp} ${y1}, ${x2 - cp} ${y2}, ${x2} ${y2} ` +
-           `C ${x2 + cp} ${y2}, ${x3 - cp} ${y3}, ${x3} ${y3} ` +
-           `C ${x3 + cp} ${y3}, ${x4 - cp} ${y4}, ${x4} ${y4}`;
+    let path = '';
+    for (let x = 120; x <= 360; x += 3) {
+      const y = yBase - (x - 130) * slantFactor + Math.sin(x * freq + phaseOffset) * amp;
+      path += (x === 120 ? 'M' : 'L') + ` ${x.toFixed(1)} ${y.toFixed(1)} `;
+    }
+    return path.trim();
   }
 
   function getHorizontalWaveB(i) {
-    const yBase = i * 18;
-    const amp = 8;
+    const yBase = i * 22 - 10;
+    const amp = 12;
+    const freq = 0.075;
     const phaseOffset = -i * 0.8 + Math.PI; // opposite phase to create intertwined intersections
     const slantFactor = 0.287;
     
-    const yVal = (x) => {
-      return yBase - (x - 130) * slantFactor + Math.sin(x * 0.05 + phaseOffset) * amp;
-    };
-
-    const x0 = 130, x1 = 185, x2 = 240, x3 = 295, x4 = 350;
-    const y0 = yVal(x0);
-    const y1 = yVal(x1);
-    const y2 = yVal(x2);
-    const y3 = yVal(x3);
-    const y4 = yVal(x4);
-
-    const cp = 18;
-    return `M ${x0} ${y0} ` +
-           `C ${x0 + cp} ${y0}, ${x1 - cp} ${y1}, ${x1} ${y1} ` +
-           `C ${x1 + cp} ${y1}, ${x2 - cp} ${y2}, ${x2} ${y2} ` +
-           `C ${x2 + cp} ${y2}, ${x3 - cp} ${y3}, ${x3} ${y3} ` +
-           `C ${x3 + cp} ${y3}, ${x4 - cp} ${y4}, ${x4} ${y4}`;
+    let path = '';
+    for (let x = 120; x <= 360; x += 3) {
+      const y = yBase - (x - 130) * slantFactor + Math.sin(x * freq + phaseOffset) * amp;
+      path += (x === 120 ? 'M' : 'L') + ` ${x.toFixed(1)} ${y.toFixed(1)} `;
+    }
+    return path.trim();
   }
 </script>
 
@@ -133,7 +113,7 @@
     <!-- Dense repeating diagonal text background -->
     <rect width="200%" height="200%" x="-200" y="-100" fill="url(#wm-text)" />
 
-    <!-- Guilloche wavy security lines - exactly 26 thick, -16-degree inclined horizontal waves on the right side fading out to the left -->
+    <!-- Guilloche wavy security lines - exactly 13 thick, -16-degree inclined horizontal waves on the right side fading out to the left -->
     <g fill="none" stroke="url(#wave-grad)">
       {#each Array(13) as _, i}
         <!-- Group A horizontal waves -->
