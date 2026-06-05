@@ -236,7 +236,7 @@
   });
 </script>
 
-<div class="min-h-screen bg-[#0d0916] flex flex-col md:flex-row items-center justify-center p-0 sm:p-6 md:p-12 gap-8 selection:bg-blue-200">
+<div class="min-h-[100dvh] bg-[#0d0916] flex flex-col md:flex-row items-center justify-center p-0 sm:p-6 md:p-12 gap-8 selection:bg-blue-200">
   
   <!-- LEFT PANEL: Instructions & Quick Actions (visible only on desktop / tablet screen sizes) -->
   <div class="hidden md:flex flex-col max-w-sm text-gray-300 gap-4 self-start mt-6 bg-[#1a1426] p-6 rounded-2xl border border-purple-900/30 shadow-xl">
@@ -291,7 +291,7 @@
   </div>
 
   <!-- CENTER: Simulated Phone Container (Borderless & full-screen on mobile, mockup on desktop) -->
-  <div class="relative w-full h-screen sm:w-[385px] sm:h-[820px] bg-ticket-bg sm:rounded-[48px] sm:shadow-[0_24px_50px_-12px_rgba(0,0,0,0.5)] sm:border-[10px] sm:border-[#1f172f] overflow-hidden flex flex-col class:locked-mode={isLocked}">
+  <div class="relative w-full h-[100dvh] sm:w-[385px] sm:h-[820px] bg-ticket-bg sm:rounded-[48px] sm:shadow-[0_24px_50px_-12px_rgba(0,0,0,0.5)] sm:border-[10px] sm:border-[#1f172f] overflow-hidden flex flex-col class:locked-mode={isLocked}">
     
     <!-- Phone Top Camera/Ear Speaker notch overlay (Simulated for visual wow factor on desktop) -->
     <div class="absolute top-0 inset-x-0 h-5 bg-[#130926] z-50 flex justify-center items-center pointer-events-none rounded-t-[38px] hidden sm:flex">
@@ -299,7 +299,7 @@
     </div>
 
     <!-- 1. Header (Navbar) -->
-    <header class="bg-brand-purple text-white pt-4 pb-3 px-4 flex items-center relative z-40">
+    <header class="bg-brand-purple text-white pb-3 px-4 flex items-center relative z-40" style="padding-top: calc(1rem + env(safe-area-inset-top, 0px));">
       <!-- Back arrow -->
       <button aria-label="Retour" class="text-white hover:text-gray-300 transition focus:outline-none flex items-center justify-center -ml-1">
         <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
