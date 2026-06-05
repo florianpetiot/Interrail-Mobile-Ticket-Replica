@@ -51,35 +51,55 @@
     return `${cleanName} / ${dobDayMonth} / ${cleanPassNo}`;
   });
 
-  // Math functions to generate the 20 intertwined horizontal security waves on the right side
+  // Generate smooth horizontal security waves tilted at -16 degrees to match text rotation
   function getHorizontalWaveA(i) {
-    const yBase = i * 19;
+    const yBase = i * 18;
+    const amp = 8;
+    const phaseOffset = i * 0.8;
+    const slantFactor = 0.287; // tan(16 deg) matches the -16 degree rotation of text
     
-    // Wave points with progressive phase offsets
-    const y0 = yBase + Math.sin(i * 0.8) * 8;
-    const y1 = yBase + Math.sin(i * 0.8 + 1.5) * 10;
-    const y2 = yBase + Math.sin(i * 0.8 + 3.0) * 8;
-    const y3 = yBase + Math.sin(i * 0.8 + 4.5) * 10;
+    const yVal = (x) => {
+      return yBase - (x - 130) * slantFactor + Math.sin(x * 0.05 + phaseOffset) * amp;
+    };
 
-    return `M 130 ${y0} ` +
-           `C 185 ${y0 + 6}, 240 ${y1 - 6}, 250 ${y1} ` +
-           `C 280 ${y1 + 6}, 310 ${y2 - 6}, 320 ${y2} ` +
-           `C 330 ${y2 + 6}, 340 ${y3 - 6}, 350 ${y3}`;
+    const x0 = 130, x1 = 185, x2 = 240, x3 = 295, x4 = 350;
+    const y0 = yVal(x0);
+    const y1 = yVal(x1);
+    const y2 = yVal(x2);
+    const y3 = yVal(x3);
+    const y4 = yVal(x4);
+
+    const cp = 18; // cubic tension factor for wave roundness
+    return `M ${x0} ${y0} ` +
+           `C ${x0 + cp} ${y0}, ${x1 - cp} ${y1}, ${x1} ${y1} ` +
+           `C ${x1 + cp} ${y1}, ${x2 - cp} ${y2}, ${x2} ${y2} ` +
+           `C ${x2 + cp} ${y2}, ${x3 - cp} ${y3}, ${x3} ${y3} ` +
+           `C ${x3 + cp} ${y3}, ${x4 - cp} ${y4}, ${x4} ${y4}`;
   }
 
   function getHorizontalWaveB(i) {
-    const yBase = i * 19;
+    const yBase = i * 18;
+    const amp = 8;
+    const phaseOffset = -i * 0.8 + Math.PI; // opposite phase to create intertwined intersections
+    const slantFactor = 0.287;
     
-    // Wave points with inverse phase to create an intertwined mesh structure
-    const y0 = yBase - Math.sin(i * 0.8) * 8;
-    const y1 = yBase - Math.sin(i * 0.8 + 1.5) * 10;
-    const y2 = yBase - Math.sin(i * 0.8 + 3.0) * 8;
-    const y3 = yBase - Math.sin(i * 0.8 + 4.5) * 10;
+    const yVal = (x) => {
+      return yBase - (x - 130) * slantFactor + Math.sin(x * 0.05 + phaseOffset) * amp;
+    };
 
-    return `M 130 ${y0} ` +
-           `C 185 ${y0 - 6}, 240 ${y1 + 6}, 250 ${y1} ` +
-           `C 280 ${y1 - 6}, 310 ${y2 + 6}, 320 ${y2} ` +
-           `C 330 ${y2 - 6}, 340 ${y3 + 6}, 350 ${y3}`;
+    const x0 = 130, x1 = 185, x2 = 240, x3 = 295, x4 = 350;
+    const y0 = yVal(x0);
+    const y1 = yVal(x1);
+    const y2 = yVal(x2);
+    const y3 = yVal(x3);
+    const y4 = yVal(x4);
+
+    const cp = 18;
+    return `M ${x0} ${y0} ` +
+           `C ${x0 + cp} ${y0}, ${x1 - cp} ${y1}, ${x1} ${y1} ` +
+           `C ${x1 + cp} ${y1}, ${x2 - cp} ${y2}, ${x2} ${y2} ` +
+           `C ${x2 + cp} ${y2}, ${x3 - cp} ${y3}, ${x3} ${y3} ` +
+           `C ${x3 + cp} ${y3}, ${x4 - cp} ${y4}, ${x4} ${y4}`;
   }
 </script>
 
@@ -102,10 +122,10 @@
         </text>
       </pattern>
 
-      <!-- Linear gradient that fades the horizontal waves out towards the left (around x=130) -->
+      <!-- Linear gradient: solid grey for the right 70%, fades to transparent on the left 30% (starts fading 3/4 of the way to the left) -->
       <linearGradient id="wave-grad" x1="350" y1="0" x2="130" y2="0" gradientUnits="userSpaceOnUse">
         <stop offset="0%" stop-color="#3b4963" stop-opacity="0.22" />
-        <stop offset="60%" stop-color="#3b4963" stop-opacity="0.10" />
+        <stop offset="70%" stop-color="#3b4963" stop-opacity="0.22" />
         <stop offset="100%" stop-color="#3b4963" stop-opacity="0.0" />
       </linearGradient>
     </defs>
@@ -113,9 +133,9 @@
     <!-- Dense repeating diagonal text background -->
     <rect width="200%" height="200%" x="-200" y="-100" fill="url(#wm-text)" />
 
-    <!-- Guilloche wavy security lines - exactly 20 thick, intertwined horizontal waves on the right side fading out to the left -->
+    <!-- Guilloche wavy security lines - exactly 26 thick, -16-degree inclined horizontal waves on the right side fading out to the left -->
     <g fill="none" stroke="url(#wave-grad)">
-      {#each Array(10) as _, i}
+      {#each Array(13) as _, i}
         <!-- Group A horizontal waves -->
         <path d={getHorizontalWaveA(i)} stroke-width="1.3" />
         <!-- Group B horizontal waves (intertwined with Group A) -->
