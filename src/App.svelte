@@ -71,6 +71,9 @@
   // Lock editable fields state
   let isLocked = $state(false);
 
+  // PWA fullscreen tooltip for iOS
+  let showIosPwaToast = $state(false);
+
   // Active Navigation Tab
   let activeTab = $state('meinPass');
 
@@ -80,29 +83,61 @@
 
   // Toggle fullscreen mode
   function toggleFullScreen() {
-    if (!document.fullscreenElement) {
-      document.documentElement.requestFullscreen()
-        .then(() => {
+    const docEl = document.documentElement;
+    const requestFS = docEl.requestFullscreen || 
+                      docEl.webkitRequestFullscreen || 
+                      docEl.mozRequestFullScreen || 
+                      docEl.msRequestFullscreen;
+
+    const exitFS = document.exitFullscreen || 
+                   document.webkitExitFullscreen || 
+                   document.mozCancelFullScreen || 
+                   document.msExitFullscreen;
+
+    const isFullscreen = document.fullscreenElement || 
+                         document.webkitFullscreenElement || 
+                         document.mozFullScreenElement || 
+                         document.msFullscreenElement;
+
+    if (!requestFS) {
+      // Fullscreen API is not supported on iPhone Safari.
+      // Toggle a helpful iOS Home Screen installation tooltip toast instead.
+      showIosPwaToast = !showIosPwaToast;
+      return;
+    }
+
+    if (!isFullscreen) {
+      const promise = requestFS.call(docEl);
+      if (promise && promise.then) {
+        promise.then(() => {
           if (screen.orientation && screen.orientation.lock) {
             screen.orientation.lock('portrait').catch(err => {
               console.warn("Screen orientation lock is not supported on this device/browser:", err);
             });
           }
-        })
-        .catch(err => {
-          console.error(`Error attempting to enable full-screen mode: ${err.message}`);
+        }).catch(err => {
+          console.error(`Error attempting to enable fullscreen mode: ${err.message}`);
         });
+      } else {
+        // Fallback for browsers that do not return a promise
+        if (screen.orientation && screen.orientation.lock) {
+          screen.orientation.lock('portrait').catch(() => {});
+        }
+      }
     } else {
-      if (document.exitFullscreen) {
-        document.exitFullscreen()
-          .then(() => {
+      if (exitFS) {
+        const promise = exitFS.call(document);
+        if (promise && promise.then) {
+          promise.then(() => {
             if (screen.orientation && screen.orientation.unlock) {
               screen.orientation.unlock();
             }
-          })
-          .catch(err => {
-            console.warn("Error exiting fullscreen or unlocking orientation:", err);
-          });
+          }).catch(() => {});
+        } else {
+          if (screen.orientation && screen.orientation.unlock) {
+            screen.orientation.unlock();
+          }
+        }
       }
     }
   }
@@ -741,6 +776,26 @@
     </footer>
 
   </div>
+
+  <!-- PWA Fullscreen iOS Helper Toast -->
+  {#if showIosPwaToast}
+    <div class="fixed bottom-20 inset-x-4 bg-black/95 backdrop-blur-md text-white p-4 rounded-2xl z-50 flex flex-col gap-2 shadow-2xl border border-white/10 select-none max-w-sm mx-auto">
+      <div class="flex justify-between items-start">
+        <span class="font-bold text-[13px] flex items-center gap-1.5 text-blue-400">
+          <span>📲</span> {t.pwaToastTitle}
+        </span>
+        <button 
+          onclick={() => showIosPwaToast = false} 
+          class="text-gray-400 hover:text-white text-[10px] font-bold px-2 py-0.5 rounded-full bg-white/10"
+        >
+          ✕
+        </button>
+      </div>
+      <p class="text-[11px] text-gray-300 leading-relaxed">
+        {t.pwaToastDesc}
+      </p>
+    </div>
+  {/if}
 
   <!-- Mobile landscape orientation lock overlay -->
   <div class="hidden max-lg:landscape:flex fixed inset-0 bg-[#0d0916] z-[9999] flex-col items-center justify-center text-white p-6 text-center select-none">
