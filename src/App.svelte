@@ -512,6 +512,7 @@
             </div>
 
             <!-- Route Stop Block -->
+            {#key isLocked}
             <div class="flex items-start gap-2.5">
               
               <!-- Yellow bullseye marker icon -->
@@ -522,77 +523,90 @@
               <!-- Journey contents (using wrapping contenteditable spans with bind:textContent) -->
               <div class="flex-grow text-[13.5px] leading-relaxed text-ticket-navy">
                 <div class="inline-block">
-                  <span 
-                    role="textbox"
-                    tabindex={isLocked ? -1 : 0}
-                    contenteditable="true"
-                    bind:textContent={journeyOrigin} 
-                    onkeydown={preventEnter}
-                    class="editable-input font-medium cursor-text hover:bg-gray-100/50 focus:bg-blue-50/50 px-0.5 rounded outline-none border border-transparent hover:border-gray-200/50 focus:border-blue-300 inline {isLocked ? 'pointer-events-none select-none' : ''}" 
-                  ></span>
-                  
-                  <span 
-                    role="textbox"
-                    tabindex={isLocked ? -1 : 0}
-                    contenteditable="true"
-                    bind:textContent={journeyOriginTime} 
-                    onkeydown={preventEnter}
-                    class="editable-input font-bold cursor-text hover:bg-gray-100/50 focus:bg-blue-50/50 px-0.5 rounded outline-none border border-transparent hover:border-gray-200/50 focus:border-blue-300 inline ml-1 font-mono {isLocked ? 'pointer-events-none select-none' : ''}" 
-                  ></span>
-                  
-                  <span class="text-ticket-gray mx-1 font-normal inline select-none">–</span>
-                  
-                  <span 
-                    role="textbox"
-                    tabindex={isLocked ? -1 : 0}
-                    contenteditable="true"
-                    bind:textContent={journeyDest} 
-                    onkeydown={preventEnter}
-                    class="editable-input font-medium cursor-text hover:bg-gray-100/50 focus:bg-blue-50/50 px-0.5 rounded outline-none border border-transparent hover:border-gray-200/50 focus:border-blue-300 inline {isLocked ? 'pointer-events-none select-none' : ''}" 
-                  ></span>
-                  
-                  <span 
-                    role="textbox"
-                    tabindex={isLocked ? -1 : 0}
-                    contenteditable="true"
-                    bind:textContent={journeyDestTime} 
-                    onkeydown={preventEnter}
-                    class="editable-input font-bold cursor-text hover:bg-gray-100/50 focus:bg-blue-50/50 px-0.5 rounded outline-none border border-transparent hover:border-gray-200/50 focus:border-blue-300 inline ml-1 font-mono {isLocked ? 'pointer-events-none select-none' : ''}" 
-                  ></span>
-                  
-                  <span 
-                    role="textbox"
-                    tabindex={isLocked ? -1 : 0}
-                    contenteditable="true"
-                    bind:textContent={journeyCode} 
-                    onkeydown={preventEnter}
-                    class="editable-input text-ticket-gray cursor-text hover:bg-gray-100/50 focus:bg-blue-50/50 px-0.5 rounded outline-none border border-transparent hover:border-gray-200/50 focus:border-blue-300 inline ml-1 font-mono {isLocked ? 'pointer-events-none select-none' : ''}" 
-                  ></span>
+                  {#if !isLocked}
+                    <span 
+                      role="textbox"
+                      tabindex={0}
+                      contenteditable="true"
+                      bind:textContent={journeyOrigin} 
+                      onkeydown={preventEnter}
+                      class="editable-input font-medium cursor-text hover:bg-gray-100/50 focus:bg-blue-50/50 px-0.5 rounded outline-none border border-transparent hover:border-gray-200/50 focus:border-blue-300 inline" 
+                    ></span>
+                    
+                    <span 
+                      role="textbox"
+                      tabindex={0}
+                      contenteditable="true"
+                      bind:textContent={journeyOriginTime} 
+                      onkeydown={preventEnter}
+                      class="editable-input font-bold cursor-text hover:bg-gray-100/50 focus:bg-blue-50/50 px-0.5 rounded outline-none border border-transparent hover:border-gray-200/50 focus:border-blue-300 inline ml-1 font-mono" 
+                    ></span>
+                    
+                    <span class="text-ticket-gray mx-1 font-normal inline select-none">–</span>
+                    
+                    <span 
+                      role="textbox"
+                      tabindex={0}
+                      contenteditable="true"
+                      bind:textContent={journeyDest} 
+                      onkeydown={preventEnter}
+                      class="editable-input font-medium cursor-text hover:bg-gray-100/50 focus:bg-blue-50/50 px-0.5 rounded outline-none border border-transparent hover:border-gray-200/50 focus:border-blue-300 inline" 
+                    ></span>
+                    
+                    <span 
+                      role="textbox"
+                      tabindex={0}
+                      contenteditable="true"
+                      bind:textContent={journeyDestTime} 
+                      onkeydown={preventEnter}
+                      class="editable-input font-bold cursor-text hover:bg-gray-100/50 focus:bg-blue-50/50 px-0.5 rounded outline-none border border-transparent hover:border-gray-200/50 focus:border-blue-300 inline ml-1 font-mono" 
+                    ></span>
+                    
+                    <span 
+                      role="textbox"
+                      tabindex={0}
+                      contenteditable="true"
+                      bind:textContent={journeyCode} 
+                      onkeydown={preventEnter}
+                      class="editable-input text-ticket-gray cursor-text hover:bg-gray-100/50 focus:bg-blue-50/50 px-0.5 rounded outline-none border border-transparent hover:border-gray-200/50 focus:border-blue-300 inline ml-1 font-mono" 
+                    ></span>
+                  {:else}
+                    <span contenteditable="false" class="font-medium px-0.5 inline pointer-events-none select-none">{journeyOrigin}</span>
+                    <span contenteditable="false" class="font-bold ml-1 font-mono inline pointer-events-none select-none">{journeyOriginTime}</span>
+                    <span class="text-ticket-gray mx-1 font-normal inline select-none">–</span>
+                    <span contenteditable="false" class="font-medium px-0.5 inline pointer-events-none select-none">{journeyDest}</span>
+                    <span contenteditable="false" class="font-bold ml-1 font-mono inline pointer-events-none select-none">{journeyDestTime}</span>
+                    <span contenteditable="false" class="text-ticket-gray ml-1 font-mono inline pointer-events-none select-none">{journeyCode}</span>
+                  {/if}
                 </div>
 
                 <!-- Warnings and custom badges -->
                 <div class="mt-2.5 flex flex-col gap-1 items-start">
                   
                   <!-- Warning badge -->
-                  <div class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-[#f3f5f8] border border-gray-200/50 text-[10.5px]">
+                  <div class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-white border border-gray-200 text-[10.5px]">
                     <div class="w-3.5 h-3.5 rounded-full bg-ticket-orange flex items-center justify-center text-white text-[9.5px] font-black select-none">
                       !
                     </div>
-                    <span class="font-medium text-ticket-orange-dark select-none">
+                    <span class="font-medium text-ticket-orange-dark select-none px-0.5">
                       {t.journeyLabel}
                     </span>
                   </div>
 
                   <!-- Italics Seat warning -->
-                  <div class="text-[11px] italic text-ticket-orange pl-1 mt-0.5">
-                    <span 
-                      role="textbox"
-                      tabindex={isLocked ? -1 : 0}
-                      contenteditable="true"
-                      bind:textContent={journeySeatText} 
-                      onkeydown={preventEnter}
-                      class="editable-input text-ticket-orange italic cursor-text hover:bg-gray-200/50 focus:bg-blue-50/50 px-0.5 rounded outline-none {isLocked ? 'pointer-events-none select-none' : ''}" 
-                    ></span>
+                  <div class="text-[11px] italic text-ticket-orange mt-0.5">
+                    {#if !isLocked}
+                      <span 
+                        role="textbox"
+                        tabindex={0}
+                        contenteditable="true"
+                        bind:textContent={journeySeatText} 
+                        onkeydown={preventEnter}
+                        class="editable-input text-ticket-orange italic cursor-text hover:bg-gray-200/50 focus:bg-blue-50/50 px-0.5 rounded outline-none" 
+                      ></span>
+                    {:else}
+                      <span contenteditable="false" class="text-ticket-orange italic px-0.5 inline pointer-events-none select-none">{journeySeatText}</span>
+                    {/if}
                   </div>
 
                 </div>
@@ -600,6 +614,7 @@
               </div>
 
             </div>
+            {/key}
 
           </div>
 
