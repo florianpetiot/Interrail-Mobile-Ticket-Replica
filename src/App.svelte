@@ -220,7 +220,18 @@
       systemTime = `${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
     }
 
-    return () => clearInterval(interval);
+    // Block iOS Safari pinch-to-zoom gestures
+    const preventZoom = (e) => e.preventDefault();
+    document.addEventListener('gesturestart', preventZoom);
+    document.addEventListener('gesturechange', preventZoom);
+    document.addEventListener('gestureend', preventZoom);
+
+    return () => {
+      clearInterval(interval);
+      document.removeEventListener('gesturestart', preventZoom);
+      document.removeEventListener('gesturechange', preventZoom);
+      document.removeEventListener('gestureend', preventZoom);
+    };
   });
 
   // Auto-save reactive state variables to localStorage
